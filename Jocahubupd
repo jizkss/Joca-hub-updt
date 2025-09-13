@@ -291,7 +291,7 @@ end
 -- Botão de toggle ESP (opcional, pois a tecla H já ativa/desativa)
 local espButton = Instance.new("TextButton")
 espButton.Size = UDim2.new(0, 160, 0, 40)
-espButton.Position = UDim2.new(0.5, -80, 1, -55)
+espButton.Position = UDim2.new(0.5, 0, 1, -55)
 espButton.AnchorPoint = Vector2.new(0.5, 0)
 espButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
 espButton.TextColor3 = Color3.fromRGB(55, 20, 90)
