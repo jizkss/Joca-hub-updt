@@ -134,7 +134,7 @@ for i, name in ipairs(categories) do
     -- Frame de conteúdo da categoria
     local catFrame = Instance.new("Frame")
     catFrame.Size = UDim2.new(1, -40, 1, -120)
-    catFrame.Position = UDim2.new(0, 25, 0, 108)
+    catFrame.Position = UDim2.new(0, 40, 0, 108)
     catFrame.BackgroundTransparency = 1
     catFrame.Visible = i == 1
     catFrame.Parent = MainFrame
