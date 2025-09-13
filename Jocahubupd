@@ -4,7 +4,7 @@ local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
 -- Atualizado para o novo assetId
-local IMAGE_ASSET_ID = "rbxassetid://99177518187781"
+local IMAGE_ASSET_ID = "rbxassetid://115538776946656"
 
 -- GUI principal do Hub
 local ScreenGui = Instance.new("ScreenGui")
