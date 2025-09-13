@@ -31,7 +31,7 @@ IconShadow.BackgroundTransparency = 1
 IconShadow.Image = "rbxassetid://1316045217"
 IconShadow.Size = UDim2.new(1, 22, 1, 22)
 IconShadow.Position = UDim2.new(0, -11, 0, -11)
-IconShadow.ImageTransparency = 0.75
+IconShadow.ImageTransparency = 0.30
 IconShadow.ImageColor3 = Color3.new(0,0,0)
 IconShadow.ZIndex = 9
 IconShadow.Parent = IconButton
@@ -134,7 +134,7 @@ for i, name in ipairs(categories) do
     -- Frame de conteúdo da categoria
     local catFrame = Instance.new("Frame")
     catFrame.Size = UDim2.new(1, -40, 1, -120)
-    catFrame.Position = UDim2.new(0, 20, 0, 108)
+    catFrame.Position = UDim2.new(0, 40, 0, 108)
     catFrame.BackgroundTransparency = 1
     catFrame.Visible = i == 1
     catFrame.Parent = MainFrame
