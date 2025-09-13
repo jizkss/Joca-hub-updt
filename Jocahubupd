@@ -4,7 +4,7 @@ local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
 -- Atualizado para o novo assetId
-local IMAGE_ASSET_ID = "rbxassetid://115538776946656"
+local IMAGE_ASSET_ID = "rbxassetid://99177518187781"
 
 -- GUI principal do Hub
 local ScreenGui = Instance.new("ScreenGui")
@@ -158,7 +158,7 @@ ContentLabel.Parent = MainFrame
 ContentLabel.ZIndex = 2
 
 local categoryContents = {
-    "Esp roxo.\n\n(Use a tecla "H" para ativar/desativar ESP)",
+    "Configurações de ESP aqui.\n\n(Use o menu para ativar/desativar ESP e ajustar opções)",
     "Configurações de Aimbot aqui.\n\n(Em breve!)",
     "Configurações de Misc aqui.\n\n(Em breve!)",
 }
