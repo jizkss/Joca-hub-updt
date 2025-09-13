@@ -1,5 +1,5 @@
 -- CONFIGURAÇÃO
-local IMAGE_ASSET_ID = "rbxassetid://99177518187781" -- Troque se necessário
+local IMAGE_ASSET_ID = "rbxassetid://115538776946656" -- Troque se necessário
 
 -- SERVIÇOS
 local UIS = game:GetService("UserInputService")
@@ -70,8 +70,8 @@ end)
 -- MENU PRINCIPAL
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "JocaHubMain"
-MainFrame.Size = UDim2.new(0, 370, 0, 320)
-MainFrame.Position = UDim2.new(0, 90, 1, -340)
+MainFrame.Size = UDim2.new(0, 400, 0, 370)
+MainFrame.Position = UDim2.new(0, 90, 1, -390)
 MainFrame.AnchorPoint = Vector2.new(0, 1)
 MainFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 255)
 MainFrame.BackgroundTransparency = 0.08
@@ -199,8 +199,9 @@ UIS.InputBegan:Connect(function(input, gp)
     end
 end)
 
--- =============== ABA ESP (EXEMPLO) ================
+-- =============== ABA ESP ================
 local ESP_Ativo = false
+local espColor = Color3.fromRGB(170,0,255)
 local caixas = {}
 
 local function criarESP(jogador)
@@ -208,8 +209,8 @@ local function criarESP(jogador)
     if caixas[jogador] then caixas[jogador]:Destroy(); caixas[jogador] = nil end
     if jogador.Character and jogador.Character:FindFirstChild("HumanoidRootPart") then
         local highlight = Instance.new("Highlight")
-        highlight.FillColor = Color3.fromRGB(170, 0, 255)
-        highlight.OutlineColor = Color3.fromRGB(200, 120, 255)
+        highlight.FillColor = espColor
+        highlight.OutlineColor = espColor
         highlight.FillTransparency = 0.8
         highlight.OutlineTransparency = 0.1
         highlight.Adornee = jogador.Character
@@ -240,27 +241,82 @@ RunService.RenderStepped:Connect(function()
         for _, jogador in ipairs(Players:GetPlayers()) do
             if jogador ~= LocalPlayer and jogador.Character and not caixas[jogador] then
                 criarESP(jogador)
+            elseif caixas[jogador] and caixas[jogador].FillColor ~= espColor then
+                caixas[jogador].FillColor = espColor
+                caixas[jogador].OutlineColor = espColor
             end
         end
     end
 end)
 
--- Botão de toggle ESP
-do
-    local espButton = Instance.new("TextButton")
-    espButton.Size = UDim2.new(0, 160, 0, 40)
-    espButton.Position = UDim2.new(0.5, -80, 0.5, -20)
-    espButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    espButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
-    espButton.TextColor3 = Color3.fromRGB(55, 20, 90)
-    espButton.Font = Enum.Font.GothamBold
-    espButton.TextSize = 20
-    espButton.Text = "Ativar ESP"
-    espButton.Parent = categoryFrames[1]
+-- Texto de instrução
+local espInfo = Instance.new("TextLabel")
+espInfo.Size = UDim2.new(1, 0, 0, 50)
+espInfo.Position = UDim2.new(0, 0, 0, 0)
+espInfo.BackgroundTransparency = 1
+espInfo.Text = "Pressione [H] para ativar/desativar o ESP\nEscolha a cor abaixo:"
+espInfo.Font = Enum.Font.Gotham
+espInfo.TextSize = 16
+espInfo.TextColor3 = Color3.fromRGB(55, 20, 90)
+espInfo.TextWrapped = true
+espInfo.TextXAlignment = Enum.TextXAlignment.Center
+espInfo.TextYAlignment = Enum.TextYAlignment.Center
+espInfo.Parent = categoryFrames[1]
+
+-- Botões de cor
+local colorNames = {"Vermelho","Azul","Branco","Roxo"}
+local colorValues = {Color3.fromRGB(255,0,0), Color3.fromRGB(0,90,255), Color3.fromRGB(255,255,255), Color3.fromRGB(170,0,255)}
+for i=1,#colorNames do
+    local colorBtn = Instance.new("TextButton")
+    colorBtn.Size = UDim2.new(0, 75, 0, 28)
+    colorBtn.Position = UDim2.new(0, 40 + (i-1)*90, 0, 55)
+    colorBtn.BackgroundColor3 = colorValues[i]
+    colorBtn.Text = colorNames[i]
+    colorBtn.Font = Enum.Font.GothamBold
+    colorBtn.TextSize = 14
+    colorBtn.TextColor3 = (i == 3) and Color3.fromRGB(30,30,30) or Color3.fromRGB(255,255,255)
+    colorBtn.Parent = categoryFrames[1]
     local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 10)
-    btnCorner.Parent = espButton
-    espButton.MouseButton1Click:Connect(function()
+    btnCorner.CornerRadius = UDim.new(0, 8)
+    btnCorner.Parent = colorBtn
+    colorBtn.MouseButton1Click:Connect(function()
+        espColor = colorValues[i]
+        for _,v in pairs(caixas) do
+            v.FillColor = espColor
+            v.OutlineColor = espColor
+        end
+    end)
+end
+
+-- Botão de toggle ESP (opcional, pois a tecla H já ativa/desativa)
+local espButton = Instance.new("TextButton")
+espButton.Size = UDim2.new(0, 160, 0, 40)
+espButton.Position = UDim2.new(0.5, -80, 1, -55)
+espButton.AnchorPoint = Vector2.new(0.5, 0)
+espButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
+espButton.TextColor3 = Color3.fromRGB(55, 20, 90)
+espButton.Font = Enum.Font.GothamBold
+espButton.TextSize = 20
+espButton.Text = "Ativar ESP"
+espButton.Parent = categoryFrames[1]
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 10)
+btnCorner.Parent = espButton
+espButton.MouseButton1Click:Connect(function()
+    ESP_Ativo = not ESP_Ativo
+    if ESP_Ativo then
+        for _, jogador in ipairs(Players:GetPlayers()) do criarESP(jogador) end
+        espButton.Text = "Desativar ESP"
+        espButton.BackgroundColor3 = Color3.fromRGB(200,255,200)
+    else
+        removerESP()
+        espButton.Text = "Ativar ESP"
+        espButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
+    end
+end)
+UIS.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.H then
         ESP_Ativo = not ESP_Ativo
         if ESP_Ativo then
             for _, jogador in ipairs(Players:GetPlayers()) do criarESP(jogador) end
@@ -271,11 +327,10 @@ do
             espButton.Text = "Ativar ESP"
             espButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
         end
-    end)
-end
+    end
+end)
 
 -- =============== ABA AIMBOT ================
--- Botão para ativar/desativar o aimbot
 local aimbotEnabled = false
 local aimbotModule -- referência para .Exit()
 
@@ -306,17 +361,13 @@ aimbotStatus.Parent = categoryFrames[2]
 -- Função para ativar o Aimbot Universal Exunys
 local function activateAimbot()
     if aimbotModule and aimbotModule.Exit then aimbotModule:Exit() end
-
-    --[[ COPIE O CÓDIGO ABAIXO DO COMENTÁRIO "UNIVERSAL AIMBOT MODULE" ]]
-    --[[ Universal Aimbot Module by Exunys © CC0 1.0 Universal (2023 - 2024) ]]
-    -- O código a seguir é idêntico ao original, exceto pela última linha!
+    --[[ Universal Aimbot Module by Exunys ]]
     local game, workspace = game, workspace
     local getrawmetatable, getmetatable, setmetatable, pcall, getgenv, next, tick = getrawmetatable, getmetatable, setmetatable, pcall, getgenv, next, tick
     local Vector2new, Vector3zero, CFramenew, Color3fromRGB, Color3fromHSV, Drawingnew, TweenInfonew = Vector2.new, Vector3.zero, CFrame.new, Color3.fromRGB, Color3.fromHSV, Drawing.new, TweenInfo.new
     local getupvalue, mousemoverel, tablefind, tableremove, stringlower, stringsub, mathclamp = debug.getupvalue, mousemoverel or (Input and Input.MouseMove), table.find, table.remove, string.lower, string.sub, math.clamp
     local GameMetatable = getrawmetatable and getrawmetatable(game) or {
-        __index = function(self, Index) return self[Index] end,
-        __newindex = function(self, Index, Value) self[Index] = Value end
+        __index = function(self, Index) return self[Index] end, __newindex = function(self, Index, Value) self[Index] = Value end
     }
     local __index = GameMetatable.__index
     local __newindex = GameMetatable.__newindex
@@ -542,20 +593,20 @@ local function deactivateAimbot()
 end
 
 aimbotButton.MouseButton1Click:Connect(function()
-    aimbotEnabled = not aimbotEnabled
-    if aimbotEnabled then
+    if not aimbotEnabled then
         activateAimbot()
+        aimbotEnabled = true
         aimbotButton.Text = "Desativar Aimbot"
         aimbotButton.BackgroundColor3 = Color3.fromRGB(200,255,200)
         aimbotStatus.Text = "Status: Ativado"
     else
         deactivateAimbot()
+        aimbotEnabled = false
         aimbotButton.Text = "Ativar Aimbot"
         aimbotButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
         aimbotStatus.Text = "Status: Desativado"
     end
 end)
--- Desliga o aimbot ao fechar o menu (opcional)
 MainFrame:GetPropertyChangedSignal("Visible"):Connect(function()
     if not MainFrame.Visible and aimbotEnabled then
         deactivateAimbot()
@@ -567,15 +618,112 @@ MainFrame:GetPropertyChangedSignal("Visible"):Connect(function()
 end)
 
 -- =============== ABA MISC ================
-local miscLabel = Instance.new("TextLabel")
-miscLabel.Size = UDim2.new(1, 0, 1, 0)
-miscLabel.Position = UDim2.new(0, 0, 0, 0)
-miscLabel.BackgroundTransparency = 1
-miscLabel.Text = "Funções Misc em breve!\nSugira novas funções!"
-miscLabel.Font = Enum.Font.Gotham
-miscLabel.TextSize = 20
-miscLabel.TextColor3 = Color3.fromRGB(30, 30, 60)
-miscLabel.TextWrapped = true
-miscLabel.TextXAlignment = Enum.TextXAlignment.Center
-miscLabel.TextYAlignment = Enum.TextYAlignment.Center
-miscLabel.Parent = categoryFrames[3]
+local humanoid = nil
+local function getHumanoid()
+    if not LocalPlayer.Character then return nil end
+    local h = LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid")
+    return h
+end
+
+local miscFrame = categoryFrames[3]
+
+local function makeSlider(labelText, minValue, maxValue, defaultValue, posY, callback)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0, 120, 0, 28)
+    label.Position = UDim2.new(0, 18, 0, posY)
+    label.BackgroundTransparency = 1
+    label.Text = labelText
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 15
+    label.TextColor3 = Color3.fromRGB(55, 20, 90)
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = miscFrame
+
+    local sliderBG = Instance.new("Frame")
+    sliderBG.Size = UDim2.new(0, 165, 0, 10)
+    sliderBG.Position = UDim2.new(0, 135, 0, posY+8)
+    sliderBG.BackgroundColor3 = Color3.fromRGB(220,220,240)
+    sliderBG.BorderSizePixel = 0
+    sliderBG.Parent = miscFrame
+    local bgCorner = Instance.new("UICorner")
+    bgCorner.CornerRadius = UDim.new(0,5)
+    bgCorner.Parent = sliderBG
+
+    local sliderFill = Instance.new("Frame")
+    sliderFill.Size = UDim2.new((defaultValue-minValue)/(maxValue-minValue), 0, 1, 0)
+    sliderFill.BackgroundColor3 = Color3.fromRGB(170,0,255)
+    sliderFill.BorderSizePixel = 0
+    sliderFill.Parent = sliderBG
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(0,5)
+    fillCorner.Parent = sliderFill
+
+    local knob = Instance.new("Frame")
+    knob.Size = UDim2.new(0,16,0,16)
+    knob.Position = UDim2.new((defaultValue-minValue)/(maxValue-minValue), -8, 0.5, -8)
+    knob.BackgroundColor3 = Color3.fromRGB(120,0,180)
+    knob.Parent = sliderBG
+    local knobCorner = Instance.new("UICorner")
+    knobCorner.CornerRadius = UDim.new(1,0)
+    knobCorner.Parent = knob
+
+    local valueLabel = Instance.new("TextLabel")
+    valueLabel.Size = UDim2.new(0, 50, 0, 18)
+    valueLabel.Position = UDim2.new(0, 310, 0, posY)
+    valueLabel.BackgroundTransparency = 1
+    valueLabel.Text = tostring(defaultValue)
+    valueLabel.Font = Enum.Font.Gotham
+    valueLabel.TextSize = 14
+    valueLabel.TextColor3 = Color3.fromRGB(55, 20, 90)
+    valueLabel.TextXAlignment = Enum.TextXAlignment.Left
+    valueLabel.Parent = miscFrame
+
+    local dragging = false
+    local function setValueFromX(x)
+        local rel = math.clamp((x-sliderBG.AbsolutePosition.X)/sliderBG.AbsoluteSize.X, 0, 1)
+        local value = math.floor((minValue + (maxValue-minValue)*rel) * 100) / 100
+        sliderFill.Size = UDim2.new(rel,0,1,0)
+        knob.Position = UDim2.new(rel, -8, 0.5, -8)
+        valueLabel.Text = tostring(value)
+        callback(value)
+    end
+    knob.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+        end
+    end)
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            setValueFromX(input.Position.X)
+        end
+    end)
+    sliderBG.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            setValueFromX(input.Position.X)
+            dragging = true
+        end
+    end)
+    callback(defaultValue)
+end
+
+makeSlider("Velocidade:",16,100,16,30,function(val)
+    humanoid = getHumanoid()
+    if humanoid then
+        humanoid.WalkSpeed = val
+    end
+end)
+makeSlider("Pulo:", 16, 150, 50, 80, function(val)
+    humanoid = getHumanoid()
+    if humanoid then
+        humanoid.JumpPower = val
+    end
+end)
+-- Atualiza sempre que o personagem respawnar
+LocalPlayer.CharacterAdded:Connect(function(char)
+    humanoid = getHumanoid()
+end)
