@@ -336,7 +336,7 @@ local aimbotModule -- referência para .Exit()
 
 local aimbotButton = Instance.new("TextButton")
 aimbotButton.Size = UDim2.new(0, 160, 0, 40)
-aimbotButton.Position = UDim2.new(0.5, -80, 0.3, 0)
+aimbotButton.Position = UDim2.new(0.5, 0, 0.3, 0)
 aimbotButton.AnchorPoint = Vector2.new(0.5, 0)
 aimbotButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
 aimbotButton.TextColor3 = Color3.fromRGB(55, 20, 90)
