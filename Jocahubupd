@@ -715,7 +715,7 @@ Environment.Load = Load -- ExunysDeveloperAimbot.Load()
 
 setmetatable(Environment, {__call = Load})
 
-aimbotModule = return Environment)
+aimbotModule = Environment)
     if aimbotModule and aimbotModule.Exit then aimbotModule:Exit() end
     -- Código do seu aimbot aqui (cole o código do Exunys, mas troque return Environment por: aimbotModule = Environment)
     --/-------------------------- INÍCIO DO UNIVERSAL AIMBOT --------------------------
