@@ -6,6 +6,7 @@ local UIS = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 -- GUI PRINCIPAL
 local ScreenGui = Instance.new("ScreenGui")
@@ -109,8 +110,8 @@ Title.TextXAlignment = Enum.TextXAlignment.Center
 Title.Parent = MainFrame
 Title.ZIndex = 2
 
--- Abas
-local categories = {"ESP", "Aimbot", "Misc"}
+-- Abas (AGORA COM 4 CATEGORIAS)
+local categories = {"ESP", "Aimbot", "Misc", "Teleportar"}
 local buttons, categoryFrames = {}, {}
 local selectedCategory = 1
 
@@ -126,16 +127,16 @@ local TabsLayout = Instance.new("UIListLayout")
 TabsLayout.FillDirection = Enum.FillDirection.Horizontal
 TabsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 TabsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-TabsLayout.Padding = UDim.new(0, 10)
+TabsLayout.Padding = UDim.new(0, 8)
 TabsLayout.Parent = TabsContainer
 
 for i, name in ipairs(categories) do
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 90, 0, 34)
+    btn.Size = UDim2.new(0, 85, 0, 34) -- Reduzido para caber 4 botões
     btn.BackgroundColor3 = i == 1 and Color3.fromRGB(220,200,255) or Color3.fromRGB(235,235,255)
     btn.TextColor3 = i == 1 and Color3.fromRGB(55, 20, 90) or Color3.fromRGB(60, 60, 80)
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 20
+    btn.TextSize = 16 -- Reduzido para caber o texto
     btn.Text = name
     btn.Parent = TabsContainer
     btn.AutoButtonColor = true
