@@ -656,32 +656,102 @@ end)
 
 -- =============== ABA MISC ================
 local humanoid = nil
+local noclipEnabled = false
+local infiniteJumpEnabled = false
+local invisibleEnabled = false
+local noclipConnection = nil
+local jumpConnection = nil
+local originalTransparency = {}
+
 local function getHumanoid()
     if not LocalPlayer.Character then return nil end
     local h = LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid")
     return h
 end
 
-local miscFrame = categoryFrames[3]
+-- Função para garantir que as configurações sejam aplicadas mesmo após respawn
+local function applyMiscSettings()
+    humanoid = getHumanoid()
+    if humanoid then
+        -- Aplicar configurações de velocidade e pulo
+        for _, child in ipairs(MiscContainer:GetChildren()) do
+            if child:IsA("Frame") and child.Name == "SliderContainer" then
+                local valueLabel = child:FindFirstChild("ValueLabel")
+                if valueLabel then
+                    local value = tonumber(valueLabel.Text)
+                    if child:FindFirstChild("WalkSpeedLabel") then
+                        humanoid.WalkSpeed = value
+                    elseif child:FindFirstChild("JumpPowerLabel") then
+                        humanoid.JumpPower = value
+                    end
+                end
+            end
+        end
+        
+        -- Reaplicar noclip se estiver ativado
+        if noclipEnabled then
+            enableNoclip()
+        end
+        
+        -- Reaplicar invisibilidade se estiver ativado
+        if invisibleEnabled then
+            enableInvisibility()
+        end
+    end
+end
 
-local function makeSlider(labelText, minValue, maxValue, defaultValue, posY, callback)
+-- Container para centralizar elementos Misc
+local MiscContainer = Instance.new("Frame")
+MiscContainer.Size = UDim2.new(1, 0, 1, 0)
+MiscContainer.BackgroundTransparency = 1
+MiscContainer.Parent = categoryFrames[3]
+
+-- Layout para organizar os elementos
+local MiscLayout = Instance.new("UIListLayout")
+MiscLayout.Padding = UDim.new(0, 10)
+MiscLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+MiscLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+MiscLayout.SortOrder = Enum.SortOrder.LayoutOrder
+MiscLayout.Parent = MiscContainer
+
+-- Título da seção de ajustes
+local adjustmentsTitle = Instance.new("TextLabel")
+adjustmentsTitle.Size = UDim2.new(0.8, 0, 0, 25)
+adjustmentsTitle.BackgroundTransparency = 1
+adjustmentsTitle.Text = "AJUSTES"
+adjustmentsTitle.Font = Enum.Font.GothamBold
+adjustmentsTitle.TextSize = 16
+adjustmentsTitle.TextColor3 = Color3.fromRGB(55, 20, 90)
+adjustmentsTitle.TextXAlignment = Enum.TextXAlignment.Center
+adjustmentsTitle.LayoutOrder = 1
+adjustmentsTitle.Parent = MiscContainer
+
+local function makeSlider(labelText, minValue, maxValue, defaultValue, layoutOrder, callback, identifier)
+    local sliderContainer = Instance.new("Frame")
+    sliderContainer.Size = UDim2.new(0.8, 0, 0, 50)
+    sliderContainer.BackgroundTransparency = 1
+    sliderContainer.LayoutOrder = layoutOrder
+    sliderContainer.Parent = MiscContainer
+    sliderContainer.Name = "SliderContainer"
+
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0, 120, 0, 28)
-    label.Position = UDim2.new(0, 18, 0, posY)
+    label.Size = UDim2.new(0.4, 0, 0, 28)
+    label.Position = UDim2.new(0, 0, 0, 0)
     label.BackgroundTransparency = 1
     label.Text = labelText
     label.Font = Enum.Font.GothamBold
     label.TextSize = 15
     label.TextColor3 = Color3.fromRGB(55, 20, 90)
     label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = miscFrame
+    label.Parent = sliderContainer
+    label.Name = identifier .. "Label"
 
     local sliderBG = Instance.new("Frame")
-    sliderBG.Size = UDim2.new(0, 165, 0, 10)
-    sliderBG.Position = UDim2.new(0, 135, 0, posY+8)
+    sliderBG.Size = UDim2.new(0.4, 0, 0, 10)
+    sliderBG.Position = UDim2.new(0.4, 0, 0, 8)
     sliderBG.BackgroundColor3 = Color3.fromRGB(220,220,240)
     sliderBG.BorderSizePixel = 0
-    sliderBG.Parent = miscFrame
+    sliderBG.Parent = sliderContainer
     local bgCorner = Instance.new("UICorner")
     bgCorner.CornerRadius = UDim.new(0,5)
     bgCorner.Parent = sliderBG
@@ -705,15 +775,16 @@ local function makeSlider(labelText, minValue, maxValue, defaultValue, posY, cal
     knobCorner.Parent = knob
 
     local valueLabel = Instance.new("TextLabel")
-    valueLabel.Size = UDim2.new(0, 50, 0, 18)
-    valueLabel.Position = UDim2.new(0, 310, 0, posY)
+    valueLabel.Size = UDim2.new(0.2, 0, 0, 18)
+    valueLabel.Position = UDim2.new(0.8, 0, 0, 0)
     valueLabel.BackgroundTransparency = 1
     valueLabel.Text = tostring(defaultValue)
     valueLabel.Font = Enum.Font.Gotham
     valueLabel.TextSize = 14
     valueLabel.TextColor3 = Color3.fromRGB(55, 20, 90)
-    valueLabel.TextXAlignment = Enum.TextXAlignment.Left
-    valueLabel.Parent = miscFrame
+    valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    valueLabel.Parent = sliderContainer
+    valueLabel.Name = "ValueLabel"
 
     local dragging = false
     local function setValueFromX(x)
@@ -724,43 +795,270 @@ local function makeSlider(labelText, minValue, maxValue, defaultValue, posY, cal
         valueLabel.Text = tostring(value)
         callback(value)
     end
+    
     knob.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
         end
     end)
+    
     UIS.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
         end
     end)
+    
     UIS.InputChanged:Connect(function(input)
         if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
             setValueFromX(input.Position.X)
         end
     end)
+    
     sliderBG.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             setValueFromX(input.Position.X)
             dragging = true
         end
     end)
+    
     callback(defaultValue)
 end
 
-makeSlider("Velocidade:",16,100,16,30,function(val)
+-- Título da seção de habilidades
+local abilitiesTitle = Instance.new("TextLabel")
+abilitiesTitle.Size = UDim2.new(0.8, 0, 0, 25)
+abilitiesTitle.BackgroundTransparency = 1
+abilitiesTitle.Text = "HABILIDADES"
+abilitiesTitle.Font = Enum.Font.GothamBold
+abilitiesTitle.TextSize = 16
+abilitiesTitle.TextColor3 = Color3.fromRGB(55, 20, 90)
+abilitiesTitle.TextXAlignment = Enum.TextXAlignment.Center
+abilitiesTitle.LayoutOrder = 4
+abilitiesTitle.Parent = MiscContainer
+
+-- Função Noclip
+local function enableNoclip()
+    if noclipConnection then
+        noclipConnection:Disconnect()
+        noclipConnection = nil
+    end
+    
+    noclipConnection = RunService.Stepped:Connect(function()
+        if noclipEnabled and LocalPlayer.Character then
+            for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end)
+end
+
+local function disableNoclip()
+    if noclipConnection then
+        noclipConnection:Disconnect()
+        noclipConnection = nil
+    end
+    
+    if LocalPlayer.Character then
+        for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+    end
+end
+
+-- Botão Noclip
+local noclipButton = Instance.new("TextButton")
+noclipButton.Size = UDim2.new(0.7, 0, 0, 40)
+noclipButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
+noclipButton.TextColor3 = Color3.fromRGB(55, 20, 90)
+noclipButton.Font = Enum.Font.GothamBold
+noclipButton.TextSize = 18
+noclipButton.Text = "Ativar Noclip"
+noclipButton.LayoutOrder = 5
+noclipButton.Parent = MiscContainer
+local noclipCorner = Instance.new("UICorner")
+noclipCorner.CornerRadius = UDim.new(0, 10)
+noclipCorner.Parent = noclipButton
+
+noclipButton.MouseButton1Click:Connect(function()
+    noclipEnabled = not noclipEnabled
+    if noclipEnabled then
+        noclipButton.Text = "Desativar Noclip"
+        noclipButton.BackgroundColor3 = Color3.fromRGB(200,255,200)
+        enableNoclip()
+    else
+        noclipButton.Text = "Ativar Noclip"
+        noclipButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
+        disableNoclip()
+    end
+end)
+
+-- Função Pulo Infinito
+local function enableInfiniteJump()
+    if jumpConnection then
+        jumpConnection:Disconnect()
+        jumpConnection = nil
+    end
+    
+    jumpConnection = UIS.JumpRequest:Connect(function()
+        if infiniteJumpEnabled and humanoid then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end)
+end
+
+local function disableInfiniteJump()
+    if jumpConnection then
+        jumpConnection:Disconnect()
+        jumpConnection = nil
+    end
+end
+
+-- Botão Pulo Infinito
+local infiniteJumpButton = Instance.new("TextButton")
+infiniteJumpButton.Size = UDim2.new(0.7, 0, 0, 40)
+infiniteJumpButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
+infiniteJumpButton.TextColor3 = Color3.fromRGB(55, 20, 90)
+infiniteJumpButton.Font = Enum.Font.GothamBold
+infiniteJumpButton.TextSize = 18
+infiniteJumpButton.Text = "Ativar Pulo Infinito"
+infiniteJumpButton.LayoutOrder = 6
+infiniteJumpButton.Parent = MiscContainer
+local infiniteJumpCorner = Instance.new("UICorner")
+infiniteJumpCorner.CornerRadius = UDim.new(0, 10)
+infiniteJumpCorner.Parent = infiniteJumpButton
+
+infiniteJumpButton.MouseButton1Click:Connect(function()
+    infiniteJumpEnabled = not infiniteJumpEnabled
+    if infiniteJumpEnabled then
+        infiniteJumpButton.Text = "Desativar Pulo Infinito"
+        infiniteJumpButton.BackgroundColor3 = Color3.fromRGB(200,255,200)
+        enableInfiniteJump()
+    else
+        infiniteJumpButton.Text = "Ativar Pulo Infinito"
+        infiniteJumpButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
+        disableInfiniteJump()
+    end
+end)
+
+-- Função Invisibilidade
+local function enableInvisibility()
+    if LocalPlayer.Character then
+        -- Salvar transparências originais
+        originalTransparency = {}
+        
+        for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                originalTransparency[part] = part.Transparency
+                -- Totalmente invisível para outros jogadores (transparência máxima)
+                part.Transparency = 1
+                
+                -- Para o jogador local, apenas um pouco transparente
+                if part:IsA("Part") or part:IsA("MeshPart") then
+                    local highlight = Instance.new("Highlight")
+                    highlight.FillColor = Color3.fromRGB(100, 100, 255)
+                    highlight.OutlineColor = Color3.fromRGB(50, 50, 200)
+                    highlight.FillTransparency = 0.7
+                    highlight.OutlineTransparency = 0.3
+                    highlight.Adornee = part
+                    highlight.Parent = part
+                end
+            end
+        end
+    end
+end
+
+local function disableInvisibility()
+    if LocalPlayer.Character then
+        for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                -- Restaurar transparência original
+                if originalTransparency[part] then
+                    part.Transparency = originalTransparency[part]
+                else
+                    part.Transparency = 0
+                end
+                
+                -- Remover highlight
+                for _, child in ipairs(part:GetChildren()) do
+                    if child:IsA("Highlight") then
+                        child:Destroy()
+                    end
+                end
+            end
+        end
+        originalTransparency = {}
+    end
+end
+
+-- Botão Invisibilidade
+local invisibleButton = Instance.new("TextButton")
+invisibleButton.Size = UDim2.new(0.7, 0, 0, 40)
+invisibleButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
+invisibleButton.TextColor3 = Color3.fromRGB(55, 20, 90)
+invisibleButton.Font = Enum.Font.GothamBold
+invisibleButton.TextSize = 18
+invisibleButton.Text = "Ativar Invisibilidade"
+invisibleButton.LayoutOrder = 7
+invisibleButton.Parent = MiscContainer
+local invisibleCorner = Instance.new("UICorner")
+invisibleCorner.CornerRadius = UDim.new(0, 10)
+invisibleCorner.Parent = invisibleButton
+
+invisibleButton.MouseButton1Click:Connect(function()
+    invisibleEnabled = not invisibleEnabled
+    if invisibleEnabled then
+        invisibleButton.Text = "Desativar Invisibilidade"
+        invisibleButton.BackgroundColor3 = Color3.fromRGB(200,255,200)
+        enableInvisibility()
+    else
+        invisibleButton.Text = "Ativar Invisibilidade"
+        invisibleButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
+        disableInvisibility()
+    end
+end)
+
+-- Sliders de Velocidade e Pulo
+makeSlider("Velocidade:", 16, 100, 16, 2, function(val)
     humanoid = getHumanoid()
     if humanoid then
         humanoid.WalkSpeed = val
     end
-end)
-makeSlider("Pulo:", 16, 150, 50, 80, function(val)
+end, "WalkSpeed")
+
+makeSlider("Pulo:", 16, 150, 50, 3, function(val)
     humanoid = getHumanoid()
     if humanoid then
         humanoid.JumpPower = val
     end
-end)
+end, "JumpPower")
+
 -- Atualiza sempre que o personagem respawnar
 LocalPlayer.CharacterAdded:Connect(function(char)
     humanoid = getHumanoid()
+    applyMiscSettings()
+    
+    -- Reconectar noclip se estiver ativado
+    if noclipEnabled then
+        enableNoclip()
+    end
+    
+    -- Reconectar pulo infinito se estiver ativado
+    if infiniteJumpEnabled then
+        enableInfiniteJump()
+    end
+    
+    -- Reaplicar invisibilidade se estiver ativado
+    if invisibleEnabled then
+        enableInvisibility()
+    end
 end)
+
+-- Aplicar configurações iniciais
+humanoid = getHumanoid()
+if humanoid then
+    applyMiscSettings()
+end
