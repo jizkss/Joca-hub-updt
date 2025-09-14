@@ -114,17 +114,30 @@ local categories = {"ESP", "Aimbot", "Misc"}
 local buttons, categoryFrames = {}, {}
 local selectedCategory = 1
 
+-- Container para os botões das abas (para centralização)
+local TabsContainer = Instance.new("Frame")
+TabsContainer.Size = UDim2.new(1, -80, 0, 34)
+TabsContainer.Position = UDim2.new(0, 40, 0, 62)
+TabsContainer.BackgroundTransparency = 1
+TabsContainer.Parent = MainFrame
+TabsContainer.ZIndex = 2
+
+local TabsLayout = Instance.new("UIListLayout")
+TabsLayout.FillDirection = Enum.FillDirection.Horizontal
+TabsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+TabsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+TabsLayout.Padding = UDim.new(0, 10)
+TabsLayout.Parent = TabsContainer
+
 for i, name in ipairs(categories) do
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 90, 0, 34)
-    btn.Position = UDim2.new(0, 40 + 110*(i-1), 0, 62)
     btn.BackgroundColor3 = i == 1 and Color3.fromRGB(220,200,255) or Color3.fromRGB(235,235,255)
     btn.TextColor3 = i == 1 and Color3.fromRGB(55, 20, 90) or Color3.fromRGB(60, 60, 80)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 20
     btn.Text = name
-    btn.Parent = MainFrame
-    btn.ZIndex = 2
+    btn.Parent = TabsContainer
     btn.AutoButtonColor = true
     local btnCorner = Instance.new("UICorner")
     btnCorner.CornerRadius = UDim.new(0, 10)
@@ -134,7 +147,7 @@ for i, name in ipairs(categories) do
     -- Frame de conteúdo da categoria
     local catFrame = Instance.new("Frame")
     catFrame.Size = UDim2.new(1, -40, 1, -120)
-    catFrame.Position = UDim2.new(0, 40, 0, 108)
+    catFrame.Position = UDim2.new(0, 20, 0, 108)
     catFrame.BackgroundTransparency = 1
     catFrame.Visible = i == 1
     catFrame.Parent = MainFrame
@@ -249,10 +262,16 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
+-- Container para centralizar elementos ESP
+local ESPContainer = Instance.new("Frame")
+ESPContainer.Size = UDim2.new(1, 0, 1, 0)
+ESPContainer.BackgroundTransparency = 1
+ESPContainer.Parent = categoryFrames[1]
+
 -- Texto de instrução
 local espInfo = Instance.new("TextLabel")
-espInfo.Size = UDim2.new(1, 0, 0, 50)
-espInfo.Position = UDim2.new(0, 0, 0, 0)
+espInfo.Size = UDim2.new(1, -20, 0, 50)
+espInfo.Position = UDim2.new(0, 10, 0, 10)
 espInfo.BackgroundTransparency = 1
 espInfo.Text = "Pressione [H] para ativar/desativar o ESP\nEscolha a cor abaixo:"
 espInfo.Font = Enum.Font.Gotham
@@ -261,7 +280,21 @@ espInfo.TextColor3 = Color3.fromRGB(55, 20, 90)
 espInfo.TextWrapped = true
 espInfo.TextXAlignment = Enum.TextXAlignment.Center
 espInfo.TextYAlignment = Enum.TextYAlignment.Center
-espInfo.Parent = categoryFrames[1]
+espInfo.Parent = ESPContainer
+
+-- Container para botões de cor
+local ColorButtonsContainer = Instance.new("Frame")
+ColorButtonsContainer.Size = UDim2.new(1, -20, 0, 28)
+ColorButtonsContainer.Position = UDim2.new(0, 10, 0, 70)
+ColorButtonsContainer.BackgroundTransparency = 1
+ColorButtonsContainer.Parent = ESPContainer
+
+local ColorButtonsLayout = Instance.new("UIListLayout")
+ColorButtonsLayout.FillDirection = Enum.FillDirection.Horizontal
+ColorButtonsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+ColorButtonsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+ColorButtonsLayout.Padding = UDim.new(0, 10)
+ColorButtonsLayout.Parent = ColorButtonsContainer
 
 -- Botões de cor
 local colorNames = {"Vermelho","Azul","Branco","Roxo"}
@@ -269,13 +302,12 @@ local colorValues = {Color3.fromRGB(255,0,0), Color3.fromRGB(0,90,255), Color3.f
 for i=1,#colorNames do
     local colorBtn = Instance.new("TextButton")
     colorBtn.Size = UDim2.new(0, 75, 0, 28)
-    colorBtn.Position = UDim2.new(0, 10 + (i-1)*90, 0, 55)
     colorBtn.BackgroundColor3 = colorValues[i]
     colorBtn.Text = colorNames[i]
     colorBtn.Font = Enum.Font.GothamBold
     colorBtn.TextSize = 14
     colorBtn.TextColor3 = (i == 3) and Color3.fromRGB(30,30,30) or Color3.fromRGB(255,255,255)
-    colorBtn.Parent = categoryFrames[1]
+    colorBtn.Parent = ColorButtonsContainer
     local btnCorner = Instance.new("UICorner")
     btnCorner.CornerRadius = UDim.new(0, 8)
     btnCorner.Parent = colorBtn
@@ -288,17 +320,16 @@ for i=1,#colorNames do
     end)
 end
 
--- Botão de toggle ESP (opcional, pois a tecla H já ativa/desativa)
+-- Botão de toggle ESP
 local espButton = Instance.new("TextButton")
 espButton.Size = UDim2.new(0, 160, 0, 40)
-espButton.Position = UDim2.new(0.5, 0, 1, -55)
-espButton.AnchorPoint = Vector2.new(0.5, 0)
+espButton.Position = UDim2.new(0.5, -80, 1, -55)
 espButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
 espButton.TextColor3 = Color3.fromRGB(55, 20, 90)
 espButton.Font = Enum.Font.GothamBold
 espButton.TextSize = 20
 espButton.Text = "Ativar ESP"
-espButton.Parent = categoryFrames[1]
+espButton.Parent = ESPContainer
 local btnCorner = Instance.new("UICorner")
 btnCorner.CornerRadius = UDim.new(0, 10)
 btnCorner.Parent = espButton
@@ -334,29 +365,35 @@ end)
 local aimbotEnabled = false
 local aimbotModule -- referência para .Exit()
 
+-- Container para centralizar elementos Aimbot
+local AimbotContainer = Instance.new("Frame")
+AimbotContainer.Size = UDim2.new(1, 0, 1, 0)
+AimbotContainer.BackgroundTransparency = 1
+AimbotContainer.Parent = categoryFrames[2]
+
 local aimbotButton = Instance.new("TextButton")
 aimbotButton.Size = UDim2.new(0, 160, 0, 40)
-aimbotButton.Position = UDim2.new(0.5, 0, 0.3, 0)
-aimbotButton.AnchorPoint = Vector2.new(0.5, 0)
+aimbotButton.Position = UDim2.new(0.5, -80, 0.3, 0)
 aimbotButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
 aimbotButton.TextColor3 = Color3.fromRGB(55, 20, 90)
 aimbotButton.Font = Enum.Font.GothamBold
 aimbotButton.TextSize = 20
 aimbotButton.Text = "Ativar Aimbot"
-aimbotButton.Parent = categoryFrames[2]
+aimbotButton.Parent = AimbotContainer
 local btnCorner2 = Instance.new("UICorner")
 btnCorner2.CornerRadius = UDim.new(0, 10)
 btnCorner2.Parent = aimbotButton
 
 local aimbotStatus = Instance.new("TextLabel")
-aimbotStatus.Size = UDim2.new(1, 0, 0, 60)
-aimbotStatus.Position = UDim2.new(0, 0, 0.55, 0)
+aimbotStatus.Size = UDim2.new(1, -20, 0, 60)
+aimbotStatus.Position = UDim2.new(0, 10, 0.55, 0)
 aimbotStatus.BackgroundTransparency = 1
 aimbotStatus.Text = "Status: Desativado"
 aimbotStatus.TextColor3 = Color3.fromRGB(30, 30, 60)
 aimbotStatus.Font = Enum.Font.Gotham
 aimbotStatus.TextSize = 18
-aimbotStatus.Parent = categoryFrames[2]
+aimbotStatus.TextXAlignment = Enum.TextXAlignment.Center
+aimbotStatus.Parent = AimbotContainer
 
 -- Função para ativar o Aimbot Universal Exunys
 local function activateAimbot()
