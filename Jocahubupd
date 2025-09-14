@@ -1062,3 +1062,308 @@ humanoid = getHumanoid()
 if humanoid then
     applyMiscSettings()
 end
+
+-- =============== NOVA ABA TELEPORTAR ================
+-- Adicionar "Teleportar" à lista de categorias
+local categories = {"ESP", "Aimbot", "Misc", "Teleportar"}
+local buttons, categoryFrames = {}, {}
+local selectedCategory = 1
+
+-- Container para os botões das abas (para centralização)
+local TabsContainer = Instance.new("Frame")
+TabsContainer.Size = UDim2.new(1, -80, 0, 34)
+TabsContainer.Position = UDim2.new(0, 40, 0, 62)
+TabsContainer.BackgroundTransparency = 1
+TabsContainer.Parent = MainFrame
+TabsContainer.ZIndex = 2
+
+local TabsLayout = Instance.new("UIListLayout")
+TabsLayout.FillDirection = Enum.FillDirection.Horizontal
+TabsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+TabsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+TabsLayout.Padding = UDim.new(0, 10)
+TabsLayout.Parent = TabsContainer
+
+for i, name in ipairs(categories) do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 90, 0, 34)
+    btn.BackgroundColor3 = i == 1 and Color3.fromRGB(220,200,255) or Color3.fromRGB(235,235,255)
+    btn.TextColor3 = i == 1 and Color3.fromRGB(55, 20, 90) or Color3.fromRGB(60, 60, 80)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 20
+    btn.Text = name
+    btn.Parent = TabsContainer
+    btn.AutoButtonColor = true
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 10)
+    btnCorner.Parent = btn
+    buttons[i] = btn
+
+    -- Frame de conteúdo da categoria
+    local catFrame = Instance.new("Frame")
+    catFrame.Size = UDim2.new(1, -40, 1, -120)
+    catFrame.Position = UDim2.new(0, 20, 0, 108)
+    catFrame.BackgroundTransparency = 1
+    catFrame.Visible = i == 1
+    catFrame.Parent = MainFrame
+    catFrame.ZIndex = 2
+    categoryFrames[i] = catFrame
+end
+
+-- Função para trocar abas
+local function updateCategory(idx)
+    selectedCategory = idx
+    for i, btn in ipairs(buttons) do
+        btn.BackgroundColor3 = i == idx and Color3.fromRGB(220,200,255) or Color3.fromRGB(235,235,255)
+        btn.TextColor3 = i == idx and Color3.fromRGB(55, 20, 90) or Color3.fromRGB(60, 60, 80)
+        categoryFrames[i].Visible = i == idx
+    end
+end
+for i, btn in ipairs(buttons) do
+    btn.MouseButton1Click:Connect(function()
+        updateCategory(i)
+    end)
+end
+updateCategory(1)
+
+-- =============== CONTEÚDO DA ABA TELEPORTAR ================
+local TeleportContainer = Instance.new("Frame")
+TeleportContainer.Size = UDim2.new(1, 0, 1, 0)
+TeleportContainer.BackgroundTransparency = 1
+TeleportContainer.Parent = categoryFrames[4]
+
+-- Título
+local teleportTitle = Instance.new("TextLabel")
+teleportTitle.Size = UDim2.new(1, 0, 0, 30)
+teleportTitle.Position = UDim2.new(0, 0, 0, 0)
+teleportTitle.BackgroundTransparency = 1
+teleportTitle.Text = "TELEPORTAR PARA JOGADORES"
+teleportTitle.Font = Enum.Font.GothamBold
+teleportTitle.TextSize = 18
+teleportTitle.TextColor3 = Color3.fromRGB(55, 20, 90)
+teleportTitle.TextXAlignment = Enum.TextXAlignment.Center
+teleportTitle.Parent = TeleportContainer
+
+-- Botão de Refresh
+local refreshButton = Instance.new("TextButton")
+refreshButton.Size = UDim2.new(0, 120, 0, 30)
+refreshButton.Position = UDim2.new(0.5, -60, 0, 35)
+refreshButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
+refreshButton.TextColor3 = Color3.fromRGB(55, 20, 90)
+refreshButton.Font = Enum.Font.GothamBold
+refreshButton.TextSize = 16
+refreshButton.Text = "Atualizar Lista"
+refreshButton.Parent = TeleportContainer
+local refreshCorner = Instance.new("UICorner")
+refreshCorner.CornerRadius = UDim.new(0, 8)
+refreshCorner.Parent = refreshButton
+
+-- Frame da lista de jogadores
+local playersFrame = Instance.new("ScrollingFrame")
+playersFrame.Size = UDim2.new(1, 0, 0, 200)
+playersFrame.Position = UDim2.new(0, 0, 0, 70)
+playersFrame.BackgroundTransparency = 1
+playersFrame.BorderSizePixel = 0
+playersFrame.ScrollBarThickness = 6
+playersFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+playersFrame.Parent = TeleportContainer
+
+local playersLayout = Instance.new("UIListLayout")
+playersLayout.Padding = UDim.new(0, 5)
+playersLayout.SortOrder = Enum.SortOrder.LayoutOrder
+playersLayout.Parent = playersFrame
+
+-- Botões de ação
+local teleportButton = Instance.new("TextButton")
+teleportButton.Size = UDim2.new(0, 140, 0, 35)
+teleportButton.Position = UDim2.new(0.5, -150, 0, 280)
+teleportButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
+teleportButton.TextColor3 = Color3.fromRGB(55, 20, 90)
+teleportButton.Font = Enum.Font.GothamBold
+teleportButton.TextSize = 16
+teleportButton.Text = "Teleportar"
+teleportButton.Parent = TeleportContainer
+local teleportCorner = Instance.new("UICorner")
+teleportCorner.CornerRadius = UDim.new(0, 8)
+teleportCorner.Parent = teleportButton
+
+local tweenButton = Instance.new("TextButton")
+tweenButton.Size = UDim2.new(0, 140, 0, 35)
+tweenButton.Position = UDim2.new(0.5, 10, 0, 280)
+tweenButton.BackgroundColor3 = Color3.fromRGB(220,200,255)
+tweenButton.TextColor3 = Color3.fromRGB(55, 20, 90)
+tweenButton.Font = Enum.Font.GothamBold
+tweenButton.TextSize = 16
+tweenButton.Text = "Tween"
+tweenButton.Parent = TeleportContainer
+local tweenCorner = Instance.new("UICorner")
+tweenCorner.CornerRadius = UDim.new(0, 8)
+tweenCorner.Parent = tweenButton
+
+-- Status
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, -20, 0, 40)
+statusLabel.Position = UDim2.new(0, 10, 0, 320)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Selecione um jogador da lista"
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 14
+statusLabel.TextColor3 = Color3.fromRGB(55, 20, 90)
+statusLabel.TextXAlignment = Enum.TextXAlignment.Center
+statusLabel.TextWrapped = true
+statusLabel.Parent = TeleportContainer
+
+-- Variáveis
+local selectedPlayer = nil
+local playerButtons = {}
+
+-- Função para carregar a lista de jogadores
+local function loadPlayersList()
+    -- Limpar lista anterior
+    for _, button in ipairs(playerButtons) do
+        button:Destroy()
+    end
+    playerButtons = {}
+    
+    -- Obter jogadores
+    local players = Players:GetPlayers()
+    
+    for _, player in ipairs(players) do
+        if player ~= LocalPlayer then
+            local playerButton = Instance.new("TextButton")
+            playerButton.Size = UDim2.new(1, -10, 0, 30)
+            playerButton.Position = UDim2.new(0, 5, 0, 0)
+            playerButton.BackgroundColor3 = Color3.fromRGB(240, 240, 255)
+            playerButton.TextColor3 = Color3.fromRGB(55, 20, 90)
+            playerButton.Font = Enum.Font.Gotham
+            playerButton.TextSize = 14
+            playerButton.Text = player.Name
+            playerButton.LayoutOrder = #playerButtons + 1
+            playerButton.Parent = playersFrame
+            
+            local buttonCorner = Instance.new("UICorner")
+            buttonCorner.CornerRadius = UDim.new(0, 6)
+            buttonCorner.Parent = playerButton
+            
+            playerButton.MouseButton1Click:Connect(function()
+                -- Desselecionar anterior
+                if selectedPlayer then
+                    for _, btn in ipairs(playerButtons) do
+                        btn.BackgroundColor3 = Color3.fromRGB(240, 240, 255)
+                    end
+                end
+                
+                -- Selecionar novo
+                selectedPlayer = player
+                playerButton.BackgroundColor3 = Color3.fromRGB(220, 200, 255)
+                statusLabel.Text = "Selecionado: " .. player.Name
+            end)
+            
+            table.insert(playerButtons, playerButton)
+        end
+    end
+    
+    if #players == 1 then
+        statusLabel.Text = "Nenhum outro jogador no servidor"
+    end
+end
+
+-- Função de teleport
+local function teleportToPlayer()
+    if not selectedPlayer then
+        statusLabel.Text = "Selecione um jogador primeiro!"
+        return
+    end
+    
+    if not selectedPlayer.Character then
+        statusLabel.Text = "Jogador não tem personagem!"
+        return
+    end
+    
+    local humanoidRootPart = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then
+        statusLabel.Text = "Não foi possível encontrar o jogador!"
+        return
+    end
+    
+    if not LocalPlayer.Character then
+        statusLabel.Text = "Seu personagem não existe!"
+        return
+    end
+    
+    local myRootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRootPart then
+        statusLabel.Text = "Não foi possível teletransportar!"
+        return
+    end
+    
+    -- Teleportar
+    myRootPart.CFrame = humanoidRootPart.CFrame
+    statusLabel.Text = "Teleportado para " .. selectedPlayer.Name
+end
+
+-- Função de Tween (movimento suave)
+local function tweenToPlayer()
+    if not selectedPlayer then
+        statusLabel.Text = "Selecione um jogador primeiro!"
+        return
+    end
+    
+    if not selectedPlayer.Character then
+        statusLabel.Text = "Jogador não tem personagem!"
+        return
+    end
+    
+    local humanoidRootPart = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then
+        statusLabel.Text = "Não foi possível encontrar o jogador!"
+        return
+    end
+    
+    if not LocalPlayer.Character then
+        statusLabel.Text = "Seu personagem não existe!"
+        return
+    end
+    
+    local myRootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRootPart then
+        statusLabel.Text = "Não foi possível mover!"
+        return
+    end
+    
+    -- Usar TweenService para movimento suave
+    local tweenService = game:GetService("TweenService")
+    local tweenInfo = TweenInfo.new(
+        2, -- Duração
+        Enum.EasingStyle.Quad, -- Estilo
+        Enum.EasingDirection.Out, -- Direção
+        0, -- Repetições
+        false, -- Reverte
+        0 -- Delay
+    )
+    
+    local goal = {}
+    goal.CFrame = humanoidRootPart.CFrame
+    
+    local tween = tweenService:Create(myRootPart, tweenInfo, goal)
+    tween:Play()
+    
+    statusLabel.Text = "Movendo suavemente para " .. selectedPlayer.Name
+end
+
+-- Conectar eventos
+refreshButton.MouseButton1Click:Connect(loadPlayersList)
+teleportButton.MouseButton1Click:Connect(teleportToPlayer)
+tweenButton.MouseButton1Click:Connect(tweenToPlayer)
+
+-- Carregar lista inicialmente
+loadPlayersList()
+
+-- Atualizar lista quando jogadores entrarem/sairem
+Players.PlayerAdded:Connect(function()
+    loadPlayersList()
+end)
+
+Players.PlayerRemoving:Connect(function()
+    loadPlayersList()
+end)
