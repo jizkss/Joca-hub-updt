@@ -1065,69 +1065,6 @@ if humanoid then
 end
 
 -- =============== NOVA ABA TELEPORTAR ================
--- Adicionar "Teleportar" à lista de categorias
-local categories = {"ESP", "Aimbot", "Misc", "Teleportar"}
-local buttons, categoryFrames = {}, {}
-local selectedCategory = 1
-
--- Container para os botões das abas (para centralização)
-local TabsContainer = Instance.new("Frame")
-TabsContainer.Size = UDim2.new(1, -80, 0, 34)
-TabsContainer.Position = UDim2.new(0, 40, 0, 62)
-TabsContainer.BackgroundTransparency = 1
-TabsContainer.Parent = MainFrame
-TabsContainer.ZIndex = 2
-
-local TabsLayout = Instance.new("UIListLayout")
-TabsLayout.FillDirection = Enum.FillDirection.Horizontal
-TabsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-TabsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-TabsLayout.Padding = UDim.new(0, 10)
-TabsLayout.Parent = TabsContainer
-
-for i, name in ipairs(categories) do
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 90, 0, 34)
-    btn.BackgroundColor3 = i == 1 and Color3.fromRGB(220,200,255) or Color3.fromRGB(235,235,255)
-    btn.TextColor3 = i == 1 and Color3.fromRGB(55, 20, 90) or Color3.fromRGB(60, 60, 80)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 20
-    btn.Text = name
-    btn.Parent = TabsContainer
-    btn.AutoButtonColor = true
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 10)
-    btnCorner.Parent = btn
-    buttons[i] = btn
-
-    -- Frame de conteúdo da categoria
-    local catFrame = Instance.new("Frame")
-    catFrame.Size = UDim2.new(1, -40, 1, -120)
-    catFrame.Position = UDim2.new(0, 20, 0, 108)
-    catFrame.BackgroundTransparency = 1
-    catFrame.Visible = i == 1
-    catFrame.Parent = MainFrame
-    catFrame.ZIndex = 2
-    categoryFrames[i] = catFrame
-end
-
--- Função para trocar abas
-local function updateCategory(idx)
-    selectedCategory = idx
-    for i, btn in ipairs(buttons) do
-        btn.BackgroundColor3 = i == idx and Color3.fromRGB(220,200,255) or Color3.fromRGB(235,235,255)
-        btn.TextColor3 = i == idx and Color3.fromRGB(55, 20, 90) or Color3.fromRGB(60, 60, 80)
-        categoryFrames[i].Visible = i == idx
-    end
-end
-for i, btn in ipairs(buttons) do
-    btn.MouseButton1Click:Connect(function()
-        updateCategory(i)
-    end)
-end
-updateCategory(1)
-
--- =============== CONTEÚDO DA ABA TELEPORTAR ================
 local TeleportContainer = Instance.new("Frame")
 TeleportContainer.Size = UDim2.new(1, 0, 1, 0)
 TeleportContainer.BackgroundTransparency = 1
@@ -1333,7 +1270,6 @@ local function tweenToPlayer()
     end
     
     -- Usar TweenService para movimento suave
-    local tweenService = game:GetService("TweenService")
     local tweenInfo = TweenInfo.new(
         2, -- Duração
         Enum.EasingStyle.Quad, -- Estilo
@@ -1346,7 +1282,7 @@ local function tweenToPlayer()
     local goal = {}
     goal.CFrame = humanoidRootPart.CFrame
     
-    local tween = tweenService:Create(myRootPart, tweenInfo, goal)
+    local tween = TweenService:Create(myRootPart, tweenInfo, goal)
     tween:Play()
     
     statusLabel.Text = "Movendo suavemente para " .. selectedPlayer.Name
@@ -1368,5 +1304,3 @@ end)
 Players.PlayerRemoving:Connect(function()
     loadPlayersList()
 end)
-
--- ARRUMAR TELEPORTE NAO APARECE
