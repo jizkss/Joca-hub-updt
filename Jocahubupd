@@ -1367,3 +1367,5 @@ end)
 Players.PlayerRemoving:Connect(function()
     loadPlayersList()
 end)
+
+-- ARRUMAR TELEPORTE NAO APARECE
